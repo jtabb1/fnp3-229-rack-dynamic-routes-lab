@@ -4,10 +4,8 @@ class Application
     resp = Rack::Response.new
     req = Rack::Request.new(env)
 
-    # Initialize the below for testing
-    #  outside of rspec:
-    Item.new("aa", 1.05)
-    Item.new("bb", 2.10)
+    Item.new(name: "aa", price: 1.05)
+    Item.new(name: "bb", price: 2.10)
 
     if req.path.match(/items/)
 
@@ -15,16 +13,24 @@ class Application
       item = Item.all.find{|et| et.name == item_name}
       resp.write "#{item.price}" if !!item
 
-      resp.status = 400 unless !!item
-      resp.write item_out unless !!item
+      resp.status = 404 unless !!item
+      resp.write error_out unless !!item
     else
       resp.status = 404
-      resp.write "Route not found"
+      resp.write error_out
     end
     resp.finish
+
+    # Item.reset
   end
 
-  def item_out
-    "Item not found"
+  def error_out
+    # Can the below:
+    #   resp.status = 404
+    #  be set in a method outside of "call" ?
+    "Route not found"
   end
+
+
+
 end
